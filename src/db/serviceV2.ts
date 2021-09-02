@@ -4,6 +4,32 @@ import { Tapahtuma } from '../type/tapahtuma';
 import jwt from "jsonwebtoken"
 require('dotenv').config({ path: "./src/.env" })
 
+function decodeToken(token) {
+    const decodedToken = jwt.verify(token, process.env.salaisuus)
+    if (!decodeToken) {
+        return "fail"
+    }
+    const lahetettava = { tapahtumaId: token.tapahtumaId, osallistujaId: token.osallistujaId }
+    return lahetettava
+}
+
+function generatePassword() {
+    var length = 8,
+        charset = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789",
+        retVal = "";
+    for (var i = 0, n = charset.length; i < length; ++i) {
+        retVal += charset.charAt(Math.floor(Math.random() * n));
+    }
+    return retVal;
+}
+
+async function ihminenLisays(osallistuja) {
+    const salasana = generatePassword()
+    const osallistujaDoc = new osallistujaModel({ nimi: osallistuja, salasana })
+    const tallennettu = await osallistujaDoc.save()
+    return tallennettu._id
+}
+
 const luominen = async (payload) => {
     console.log("LUOMINEN")
     await osallistujaModel.deleteMany()
@@ -20,11 +46,7 @@ const luominen = async (payload) => {
     let PromiseArr = payload.osallistujat.map(n => ihminenLisays(n))
     osallistujaIdArr = await Promise.all(PromiseArr)
 
-    async function ihminenLisays(osallistuja) {
-        const osallistujaDoc = new osallistujaModel({ nimi: osallistuja })
-        const tallennettu = await osallistujaDoc.save()
-        return tallennettu._id
-    }
+
 
     let rukalajiArr = []
     for (let i in payload.vaiheet) {
@@ -57,8 +79,9 @@ const kirjautuminen = async (osallistuja, tapahtuma) => {
     if (!kirjautunutOsallistuja || !kirjautunutTapahtuma) {
         return "fail"
     }
-    const token = jwt.sign({ nimi: kirjautunutOsallistuja._id, tahtuna: kirjautunutTapahtuma._id }, process.env.salaisuus)
-    return token
+    const token = jwt.sign({ osallistujaId: kirjautunutOsallistuja._id, tahtunaId: kirjautunutTapahtuma._id }, process.env.salaisuus)
+    const lahetettava = { token, nimi: kirjautunutOsallistuja.nimi, _id: kirjautunutOsallistuja._id }
+    return lahetettava
 }
 
 /* const haeKaikki = async (_id) => {
@@ -68,8 +91,12 @@ const kirjautuminen = async (osallistuja, tapahtuma) => {
     return haettu
 } */
 
-const haeKaikki = async (_id) => {
-    const haettu = await tapahtumaModel.findById(_id).populate('osallistujat', { nimi: 1, ehdotukset: 1 })
+const haeKaikki = async (token) => {
+    const tunnus = decodeToken(token)
+    if (tunnus === "fail") {
+        return "fail"
+    }
+    const haettu = await tapahtumaModel.findById(tunnus.tapahtumaId).populate('osallistujat', { nimi: 1, ehdotukset: 1 })
         .populate('vaiheet.ehdotukset', { ehdotus: 1, aanet: 1, ehdottajaId: 1 })
     haettu.vaiheet.map(n => console.log(n.ehdotukset))
     return haettu
@@ -143,6 +170,7 @@ const tapahtumanPoistaminen = async (_id) => {
 
 const aanestaminen = async (payload) => {
     /* äänen lisääminen ehdotuksiin */
+    const decodedToken = decodeToken(payload.token)
     let ehdotus = await ehdotusModel.findById(payload.ehdotusId)
     ehdotus.aanet = ehdotus.aanet.concat(payload.osallistujaId)
     const paivitettyEhdotus = new ehdotusModel(ehdotus)
@@ -223,4 +251,4 @@ tapahtuma.aanet.concat(aanestajanId) */
 
 
 
-export default { luominen, ehdotusLisays, tapahtumanPoistaminen, haeKaikki, aanestaminen }
+export default { luominen, ehdotusLisays, tapahtumanPoistaminen, haeKaikki, aanestaminen, kirjautuminen }

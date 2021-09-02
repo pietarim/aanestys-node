@@ -7,7 +7,7 @@ import {
 import { tapahtumaModel } from "../schema";
 import service from "../db/serviceV2"
 
-import { PalautettavaTapahtuma, Ruokalaji, AaniInput, TapahtumaInput, testi, EhdotusInput } from "../type/tapahtuma";
+import { PalautettavaTapahtuma, Ruokalaji, AaniInput, TapahtumaInput, EhdotusInput, Kirjautuminen } from "../type/tapahtuma";
 /* import { service } from 'db/service' */
 import jwt from "jsonwebtoken"
 
@@ -62,47 +62,25 @@ const aaa = {
     ]
 }
 
-@Resolver(of => testi)
-export class testiResolver {
-    @Query(returns => testi)
-    async testiHaku() {
-        console.log(testi)
-        return henkilo
-    }
-}
-
 @Resolver(of => PalautettavaTapahtuma)
 export class TapahtumaResolver {
-    @Query(returns => PalautettavaTapahtuma)
-    async tapahtumahaku() {
-        /* db kasittely tänne */
-        return aaa
-    }
-
-    @Query(returns => String)
+    @Query(returns => Kirjautuminen)
     async kirjautuminen(
-        @Arg("tapahtuma") tapahAvain: string,
-        @Arg("osallistuja") osalAvain: string
+        @Arg("tapahAvain") tapahAvain: string,
+        @Arg("osalAvain") osalAvain: string
     ) {
-
-        return "tehty"
+        const tunnukset = service.kirjautuminen(osalAvain, tapahAvain)
+        return tunnukset
     }
 
     @Query(returns => PalautettavaTapahtuma)
     async dbKaikkiHaku(
-        @Arg("id") id: string
+        @Arg("token") token: string
     ) {
         /* const id = "6126560c78c8a035544c6146" */
-        const data = service.haeKaikki(id)
+        const data = service.haeKaikki(token)
         return data
     }
-
-    /* @Query(returns => PalautettavaTapahtuma)
-    async dbKaikkiHaku() {
-        const id = "6126560c78c8a035544c6146"
-        const data = service.haeKaikki(id)
-        return data
-    } */
 
     @Mutation(of => String)
     async lisaaTapahtuma(

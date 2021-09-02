@@ -20,6 +20,7 @@ interface Ehdotus {
 
 interface Osallistuja {
     nimi: string
+    salasana: string
     ehdotuksetId: string[]
     aanet: aanilista[]
 }
@@ -67,6 +68,7 @@ const ehdotusSchema = new Schema<Ehdotus>({
 
 const osallistujaSchema = new Schema<Osallistuja>({
     nimi: { type: String },
+    salasana: { type: String },
     ehdotuksetId: { type: [String] },
     aanet: [{ vaiheId: { type: String }, ehdotusId: { type: String } }]
 })

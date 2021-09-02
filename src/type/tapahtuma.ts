@@ -1,15 +1,5 @@
 import { ObjectType, Field, InputType } from "type-graphql"
 
-/* Uudestaan alkuperäinen suunnistelma */
-
-@ObjectType()
-export class testi {
-    @Field()
-    nimi: number
-    @Field()
-    ika: string
-}
-
 @ObjectType()
 export class PalautettavaTapahtuma {
     @Field()
@@ -20,6 +10,16 @@ export class PalautettavaTapahtuma {
     osallistujat: Osallistuja[]
     @Field()
     id: string
+}
+
+@ObjectType()
+export class Kirjautuminen {
+    @Field()
+    token: string
+    @Field()
+    nimi: string
+    @Field()
+    _id: string
 }
 
 @ObjectType()
@@ -53,15 +53,9 @@ class Osallistuja {
 }
 
 @InputType()
-export class AaniIniput {
-    @Field()
-    aanestajanId: string
-    @Field()
-    kohdeEhdotusId: string
-}
-
-@InputType()
 export class TapahtumaInput {
+    @Field()
+    token: string
     @Field()
     tapahtumaNimi: string
     @Field(type => [String])
@@ -69,15 +63,6 @@ export class TapahtumaInput {
     @Field(type => [String])
     osallistujat: string[]
 }
-
-/* @InputType()
-class OsallistujaInput {
-    @Field()
-    nimi: string
-    @Field()
-    id: string
-}
- */
 /* Uudestaan alkuperäinen suunnistelma */
 
 @ObjectType()
@@ -91,28 +76,6 @@ export class Tapahtuma {
     @Field(type => [Ehdotus])
     ehdotukset: Ehdotus[]
 }
-
-/* @ObjectType()
-class Ehdotus {
-    @Field()
-    otsikko: string
-
-    @Field(type => [String])
-    aanet: string[]
-} */
-
-
-/* @InputType()
-export class TapahtumaInput {
-    @Field()
-    otsikko: string;
-
-    @Field(type => [String])
-    osallistujat: string[];
-
-    @Field(type => [String])
-    ehdotukset: string[]
-} */
 
 @ObjectType()
 export class TallennettuTapahtuma {
@@ -128,6 +91,8 @@ export class TallennettuTapahtuma {
 
 @InputType()
 export class AaniInput {
+    @Field()
+    token: string
     @Field()
     osallistujaId: string
     @Field()
@@ -149,6 +114,8 @@ export class TallennettuAani {
 @InputType()
 export class EhdotusInput {
     @Field()
+    token: string
+    @Field()
     tapahtumaId: string
     @Field()
     ehdotus: string
@@ -157,5 +124,4 @@ export class EhdotusInput {
     @Field()
     /* määränpää osoite */
     vaiheId: string
-
 }
