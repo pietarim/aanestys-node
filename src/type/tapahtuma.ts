@@ -50,12 +50,32 @@ class Osallistuja {
     nimi: string
     @Field()
     _id: string /* kaytetaan aanestamiseen ja ehdottamisessa avaimena */
+    @Field()
+    ehdotuksetId: string
+}
+
+@InputType()
+export class KirjautuminenInput {
+    @Field()
+    tapahtumaSalasana: string
+    @Field()
+    osallistujaSalasana: string
 }
 
 @InputType()
 export class TapahtumaInput {
     @Field()
     token: string
+    @Field()
+    tapahtumaNimi: string
+    @Field(type => [String])
+    vaiheet: [String]
+    @Field(type => [String])
+    osallistujat: string[]
+}
+
+@InputType()
+export class TapahtumaLuominenInput {
     @Field()
     tapahtumaNimi: string
     @Field(type => [String])
@@ -115,12 +135,12 @@ export class TallennettuAani {
 export class EhdotusInput {
     @Field()
     token: string
-    @Field()
-    tapahtumaId: string
+    /* @Field()
+    tapahtumaId: string */
     @Field()
     ehdotus: string
-    @Field()
-    ehdottajaId: string
+    /* @Field()
+    ehdottajaId: string */
     @Field()
     /* määränpää osoite */
     vaiheId: string

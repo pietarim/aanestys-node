@@ -1,16 +1,23 @@
 import { Schema, model, connect } from 'mongoose';
 import { tapahtumaModel, ehdotusModel, osallistujaModel } from '../schema';
 import { Tapahtuma } from '../type/tapahtuma';
-import jwt from "jsonwebtoken"
+import * as jwt from "jsonwebtoken"
 require('dotenv').config({ path: "./src/.env" })
 
+async function Kirjautuminen2(tunnus) {
+    const tapahtuma = await tapahtumaModel.find({ salasana: tunnus.salasana })
+    const osallistuja = await osallistujaModel.findOne({ salasana: tunnus.salasana })
+}
+
 function decodeToken(token) {
-    const decodedToken = jwt.verify(token, process.env.salaisuus)
-    if (!decodeToken) {
-        return "fail"
+    try {
+        const decodedToken = jwt.verify(token, process.env.salaisuus)
+        const lahetettava = { tapahtumaId: decodedToken.tapahtumaId, osallistujaId: decodedToken.osallistujaId }
+        console.log(lahetettava)
+        return lahetettava
+    } catch (e) {
+        throw Error("Tunnistautuminen epäonnistui")
     }
-    const lahetettava = { tapahtumaId: token.tapahtumaId, osallistujaId: token.osallistujaId }
-    return lahetettava
 }
 
 function generatePassword() {
@@ -32,11 +39,11 @@ async function ihminenLisays(osallistuja) {
 
 const luominen = async (payload) => {
     console.log("LUOMINEN")
-    await osallistujaModel.deleteMany()
+    /* await osallistujaModel.deleteMany() */
     /* await osallistujaModel.deleteOne({ nimi: "Seppo" }) */
-    await ehdotusModel.deleteMany()
+    /* await ehdotusModel.deleteMany()
     await tapahtumaModel.deleteMany()
-
+ */
     const lahetettava = {
         otsikko: payload.tapahtumaNimi,
     }
@@ -45,8 +52,6 @@ const luominen = async (payload) => {
 
     let PromiseArr = payload.osallistujat.map(n => ihminenLisays(n))
     osallistujaIdArr = await Promise.all(PromiseArr)
-
-
 
     let rukalajiArr = []
     for (let i in payload.vaiheet) {
@@ -59,43 +64,37 @@ const luominen = async (payload) => {
     const tapahtumaDoc = new tapahtumaModel({
         otsikko: payload.tapahtumaNimi,
         vaiheet: rukalajiArr,
-        osallistujat: osallistujaIdArr
+        osallistujat: osallistujaIdArr,
+        salasana: generatePassword()
     })
     const luotuTapahtuma = await tapahtumaDoc.save()
-
-    const ateriaArr = []
-
-    const tapahtuma = {
-        nimi: "hei"
-    }
-
-    const doc = new tapahtumaModel()
+    console.log(luotuTapahtuma)
     return "tehty"
 }
 
-const kirjautuminen = async (osallistuja, tapahtuma) => {
-    const kirjautunutOsallistuja = await osallistujaModel.findOne({ salaSana: osallistuja })
-    const kirjautunutTapahtuma = await tapahtumaModel.findOne({ tapahtuma })
-    if (!kirjautunutOsallistuja || !kirjautunutTapahtuma) {
-        return "fail"
+/* 
+    const kirjautunutOsallistuja = await osallistujaModel.findOne({ tunnistautuminen.osallistujaSalasana })
+    const kirjautunutTapahtuma = await tapahtumaModel.findOne({ tunnistautuminen.tapahtumaSalasana })
+*/
+
+const kirjautuminen = async (tunnistautuminen) => {
+    const kirjautunutOsallistuja = await osallistujaModel.findOne({ salasana: tunnistautuminen.osallistujaSalasana })
+    const kirjautunutTapahtuma = await tapahtumaModel.findOne({ salasana: tunnistautuminen.tapahtumaSalasana })
+    if (!kirjautunutTapahtuma || !kirjautunutOsallistuja) {
+        throw Error("kirjautuminen epäonnistui")
     }
-    const token = jwt.sign({ osallistujaId: kirjautunutOsallistuja._id, tahtunaId: kirjautunutTapahtuma._id }, process.env.salaisuus)
+    const token = jwt.sign({ osallistujaId: kirjautunutOsallistuja._id, tapahtumaId: kirjautunutTapahtuma._id }, process.env.salaisuus)
     const lahetettava = { token, nimi: kirjautunutOsallistuja.nimi, _id: kirjautunutOsallistuja._id }
     return lahetettava
 }
 
-/* const haeKaikki = async (_id) => {
-    const haettu = await tapahtumaModel.findById(_id).populate('osallistujat', { nimi: 1, ehdotukset: 1 })
-        .populate('vaiheet.ehdotukset', { ehdotus: 1, aanet: 1, ehdottajaId: 1 })
-    haettu.vaiheet.map(n => console.log(n.ehdotukset))
-    return haettu
-} */
+const kasitteleAccesToken = async (token) => {
+
+}
 
 const haeKaikki = async (token) => {
     const tunnus = decodeToken(token)
-    if (tunnus === "fail") {
-        return "fail"
-    }
+    console.log(tunnus)
     const haettu = await tapahtumaModel.findById(tunnus.tapahtumaId).populate('osallistujat', { nimi: 1, ehdotukset: 1 })
         .populate('vaiheet.ehdotukset', { ehdotus: 1, aanet: 1, ehdottajaId: 1 })
     haettu.vaiheet.map(n => console.log(n.ehdotukset))
@@ -103,14 +102,15 @@ const haeKaikki = async (token) => {
 }
 
 const ehdotusLisays = async (payload) => {
+    const tunnus = decodeToken(payload.token)
     const ehdotusDoc = new ehdotusModel({
         ehdotus: payload.ehdotus,
         aanet: [],
-        ehdottajaId: payload.ehdottajaId
+        ehdottajaId: tunnus.osallistujaId
     })
 
     const tallennettava = await ehdotusDoc.save()
-    let tapahtuma = await tapahtumaModel.findById(payload.tapahtumaId)
+    let tapahtuma = await tapahtumaModel.findById(tunnus.tapahtumaId)
     let idArr = []
     for (let n in tapahtuma.vaiheet) {
         let id = tapahtuma.vaiheet[n]._id
@@ -138,7 +138,14 @@ const ehdotusLisays = async (payload) => {
     /* const paivitettyTapahtuma = new tapahtumaModel(tapahtuma) */
 
     console.log(ehdotusDoc)
-    const paivitettyTapahtuma = await tapahtumaModel.findByIdAndUpdate(payload.tapahtumaId, tapahtuma)
+    const paivitettyTapahtuma = await tapahtumaModel.findByIdAndUpdate(tunnus.tapahtumaId, tapahtuma)
+
+    let osallistuja = await osallistujaModel.findById(tunnus.osallistujaId)
+    osallistuja.ehdotuksetId = osallistuja.ehdotuksetId.concat(tallennettava._id)
+
+    await osallistujaModel.findByIdAndUpdate(tunnus.osallistujaId, osallistuja)
+
+
     console.log(paivitettyTapahtuma)
     return "tehty"
 }
@@ -172,13 +179,12 @@ const aanestaminen = async (payload) => {
     /* äänen lisääminen ehdotuksiin */
     const decodedToken = decodeToken(payload.token)
     let ehdotus = await ehdotusModel.findById(payload.ehdotusId)
-    ehdotus.aanet = ehdotus.aanet.concat(payload.osallistujaId)
+    ehdotus.aanet = ehdotus.aanet.concat(decodedToken.osallistujaId)
     const paivitettyEhdotus = new ehdotusModel(ehdotus)
     const tallennettu = await ehdotusModel.findByIdAndUpdate(payload.ehdotusId, ehdotus)
     let aanetOsallistuja = []
 
     /* Ehdotus vanhan äänen poistaminen */
-
 
     if (payload.edeltavaEhdotusId) {
         let paivitettyEhdotusAanet = []
@@ -193,17 +199,14 @@ const aanestaminen = async (payload) => {
                         paivitettyEhdotusAanet.concat(vahennettavaEhdotus.aanet[n])
                     }
                 }
-
             }
             vahennettavaEhdotus.aanet = paivitettyEhdotusAanet
             await ehdotusModel.findByIdAndUpdate(payload.edeltavaEhdotusId, vahennettavaEhdotus)
             console.log("ehdotus update suoritettu")
         }
-
-
         /* ääenen poistaminen osallistujalta */
 
-        let muokattavaOsallistuja = await osallistujaModel.findById(payload.osallistujaId)
+        let muokattavaOsallistuja = await osallistujaModel.findById(decodedToken.osallistujaId)
         console.log('osallistuja hakija')
         console.log(muokattavaOsallistuja)
         /* const indexKayttaja = muokattavaOsallistuja.aanet.indexOf(payload.ehdotusId) */
@@ -215,20 +218,20 @@ const aanestaminen = async (payload) => {
         muokattavaOsallistuja.aanet = paivitettyOsallistujaAanet
         /* const lahetettavaOsallistuja = new osallistujaModel(muokattavaOsallistuja) */
         console.log("ennen osallistuja modelia")
-        await osallistujaModel.findByIdAndUpdate(payload.osallistujaId, muokattavaOsallistuja)
+        await osallistujaModel.findByIdAndUpdate(decodedToken.osallistujaId, muokattavaOsallistuja)
         console.log("osallistuja updaten jälkeen")
     }
 
     /* äänestämisen lisääminen osallistujaan */
     console.log("finaali")
-    let osallistuja = await osallistujaModel.findById(payload.osallistujaId)
+    let osallistuja = await osallistujaModel.findById(decodedToken.osallistujaId)
     osallistuja.aanet = osallistuja.aanet.concat({ vaiheId: payload.vaiheId, ehdotusId: payload.ehdotusId })
     console.log(osallistuja)
-    const lahetettava = await osallistujaModel.findByIdAndUpdate(payload.osallistujaId, osallistuja)
-    const tilanne = await osallistujaModel.findById(payload.osallistujaId)
+    const lahetettava = await osallistujaModel.findByIdAndUpdate(decodedToken.osallistujaId, osallistuja)
+    const tilanne = await osallistujaModel.findById(decodedToken.osallistujaId)
     console.log(tilanne)
 
-    return 'tehty'
+    return 'done'
 }
 
 /* const tapahtuma = await Tapahtuma.findById(payload.tapahtumaId)

@@ -7,7 +7,7 @@ import {
 import { tapahtumaModel } from "../schema";
 import service from "../db/serviceV2"
 
-import { PalautettavaTapahtuma, Ruokalaji, AaniInput, TapahtumaInput, EhdotusInput, Kirjautuminen } from "../type/tapahtuma";
+import { PalautettavaTapahtuma, KirjautuminenInput, TapahtumaLuominenInput, Ruokalaji, AaniInput, TapahtumaInput, EhdotusInput, Kirjautuminen } from "../type/tapahtuma";
 /* import { service } from 'db/service' */
 import jwt from "jsonwebtoken"
 
@@ -66,11 +66,10 @@ const aaa = {
 export class TapahtumaResolver {
     @Query(returns => Kirjautuminen)
     async kirjautuminen(
-        @Arg("tapahAvain") tapahAvain: string,
-        @Arg("osalAvain") osalAvain: string
+        @Arg("tunnukset") tunnukset: KirjautuminenInput
     ) {
-        const tunnukset = service.kirjautuminen(osalAvain, tapahAvain)
-        return tunnukset
+        const tokenNimiJaId = service.kirjautuminen(tunnukset)
+        return tokenNimiJaId
     }
 
     @Query(returns => PalautettavaTapahtuma)
@@ -84,7 +83,7 @@ export class TapahtumaResolver {
 
     @Mutation(of => String)
     async lisaaTapahtuma(
-        @Arg("tapahtuma") tapahtuma: TapahtumaInput
+        @Arg("tapahtuma") tapahtuma: TapahtumaLuominenInput
     ): Promise<String> {
         const payload = tapahtuma
         const palaute = await service.luominen(payload)
@@ -109,4 +108,8 @@ export class TapahtumaResolver {
         const lahetettyAani = service.aanestaminen(payload)
         return "hei"
     }
+
+    /* kehitysvaiheessa kehitysvaiheessa kehitysvaiheessa  */
+
+    /* kehitysvaiheessa kehitysvaiheessa kehitysvaiheessa  */
 }

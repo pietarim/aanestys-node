@@ -1,5 +1,15 @@
 import { Schema, model, connect } from 'mongoose';
-import { tapahtumaModel } from '../schema';
+import { tapahtumaModel, osallistujaModel } from '../schema';
+
+async function kirjautuminen(tunnus) {
+    const onkoTapahtuma = await tapahtumaModel.exists({ salasana: tunnus.tapahtuma })
+    const onkoOsallistuja = await osallistujaModel.exists({ salasana: tunnus.osallistuja })
+    if (onkoTapahtuma && onkoOsallistuja) {
+        return true
+    } else {
+        return false
+    }
+}
 
 const luominen = async (payload) => {
 

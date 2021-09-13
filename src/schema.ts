@@ -57,7 +57,8 @@ const tapahtumaSchema = new Schema<Tapahtuma>({
     osallistujat: [{
         type: 'ObjectId',
         ref: 'Osallistuja'
-    }]
+    }],
+    salasana: { type: String }
 })
 
 const ehdotusSchema = new Schema<Ehdotus>({
