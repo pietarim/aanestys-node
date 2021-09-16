@@ -1,0 +1,7 @@
+POST http://localhost:3001/kirjautuminen HTTP/1.1
+content-type: application/json
+
+{
+    "osallistujaSalasana": "0N7GcYAR",
+    "tapahtumaSalasana": "I7S3NoPb"
+}

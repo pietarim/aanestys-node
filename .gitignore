@@ -1,3 +1,5 @@
 node_modules
 .env
-.rest
+tekstiviesti.rest
+accesToken.rest
+hakeminen.rest

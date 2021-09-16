@@ -76,6 +76,7 @@ export class TapahtumaResolver {
     async dbKaikkiHaku(
         @Arg("token") token: string
     ) {
+        console.log("dbKaikkiHaku käynnistetty")
         /* const id = "6126560c78c8a035544c6146" */
         const data = service.haeKaikki(token)
         return data
@@ -108,8 +109,4 @@ export class TapahtumaResolver {
         const lahetettyAani = service.aanestaminen(payload)
         return "hei"
     }
-
-    /* kehitysvaiheessa kehitysvaiheessa kehitysvaiheessa  */
-
-    /* kehitysvaiheessa kehitysvaiheessa kehitysvaiheessa  */
 }

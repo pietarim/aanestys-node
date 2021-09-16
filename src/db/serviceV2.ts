@@ -72,19 +72,30 @@ const luominen = async (payload) => {
     return "tehty"
 }
 
-/* 
-    const kirjautunutOsallistuja = await osallistujaModel.findOne({ tunnistautuminen.osallistujaSalasana })
-    const kirjautunutTapahtuma = await tapahtumaModel.findOne({ tunnistautuminen.tapahtumaSalasana })
-*/
-
 const kirjautuminen = async (tunnistautuminen) => {
+    console.log(tunnistautuminen)
+    const osallistujaLoytyy = await osallistujaModel.exists({ salasana: tunnistautuminen.osallistujaSalasana })
+    console.log("Löytyykö osallisttuja ", osallistujaLoytyy)
+    if (osallistujaLoytyy) {
+        console.log("ei löytynyt")
+    }
+    const tapahtumaLoytyy = await tapahtumaModel.exists({ salasana: tunnistautuminen.tapahtumaSalasana })
+    if (tapahtumaLoytyy) {
+        console.log("ei löytynyt")
+    }
     const kirjautunutOsallistuja = await osallistujaModel.findOne({ salasana: tunnistautuminen.osallistujaSalasana })
     const kirjautunutTapahtuma = await tapahtumaModel.findOne({ salasana: tunnistautuminen.tapahtumaSalasana })
-    if (!kirjautunutTapahtuma || !kirjautunutOsallistuja) {
+    console.log("databasen hakemisen jälkeen")
+    console.log(kirjautunutOsallistuja)
+    console.log(kirjautunutTapahtuma)
+    /* if (!kirjautunutTapahtuma || !kirjautunutOsallistuja) {
         throw Error("kirjautuminen epäonnistui")
-    }
+    } */
     const token = jwt.sign({ osallistujaId: kirjautunutOsallistuja._id, tapahtumaId: kirjautunutTapahtuma._id }, process.env.salaisuus)
     const lahetettava = { token, nimi: kirjautunutOsallistuja.nimi, _id: kirjautunutOsallistuja._id }
+    if (!osallistujaLoytyy || !tapahtumaLoytyy) {
+        throw Error("kirjautuminen epäonnistui")
+    }
     return lahetettava
 }
 
@@ -94,7 +105,7 @@ const kasitteleAccesToken = async (token) => {
 
 const haeKaikki = async (token) => {
     const tunnus = decodeToken(token)
-    console.log(tunnus)
+    console.log("haeKaikki")
     const haettu = await tapahtumaModel.findById(tunnus.tapahtumaId).populate('osallistujat', { nimi: 1, ehdotukset: 1 })
         .populate('vaiheet.ehdotukset', { ehdotus: 1, aanet: 1, ehdottajaId: 1 })
     haettu.vaiheet.map(n => console.log(n.ehdotukset))
@@ -233,25 +244,6 @@ const aanestaminen = async (payload) => {
 
     return 'done'
 }
-
-/* const tapahtuma = await Tapahtuma.findById(payload.tapahtumaId)
-let aaniLista = []
-const vaiheIndex = tapahtuma.vaihe.indexOf(payload.vaiheId)
-tapahtuma[vaiheIndex].aanet.map(n => {
-    if (n !== payload.ehdotusId) {
-        aaniLista.concat(n)
-    }
-}
-) */
-/* const lahetettava = new aaniModel({
-    aanestajanId: payload.aanestajanId,
-    kohdeEhdotusId: payload.kohdeEhdotusId
-})
-const talennettu = await lahetettava.save()
-
-const tapahtuma = await ehdotusModel.findById(payload.kohdeEhdotusId)
-tapahtuma.aanet.concat(aanestajanId) */
-
 
 
 export default { luominen, ehdotusLisays, tapahtumanPoistaminen, haeKaikki, aanestaminen, kirjautuminen }

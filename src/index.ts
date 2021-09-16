@@ -4,18 +4,17 @@ import * as path from "path";
 import { buildSchema } from "type-graphql";
 require('dotenv').config({ path: "./src/.env" })
 import * as express from "express";
-/* const cookieParser = require("cookie-parser") */
 import * as cookieParser from "cookie-parser"
 const mongoose = require("mongoose")
 import * as cors from "cors"
-import { kirjautuminenRouter, accesTokenRouter } from "./router/router";
-/* import { accessTokenRouter } from "./router/router" */
-
-
-/* import { TapahtumaResolver, TunnusResolver } from './resolver/tapahtuma-resolver' */
+import { kirjautuminenRouter, accesTokenRouter, removeCookieRouter, viestiRouter } from "./router/router";
 import { TapahtumaResolver } from "./resolver/multi-resolver";
-/* import { TapahtumaResolver, Tapahtuma1Resolver } from "./resolvers/tapahtuma-resolver"; */
 import { Server } from "http";
+
+const corsOptions = {
+    origin: 'http://localhost:3000',
+    credentials: true
+}
 
 console.log(process.env.salaisuus)
 
@@ -24,16 +23,13 @@ app.use(express.json())
 
 app.use(cookieParser())
 
-app.use(cors())
+app.use(cors(corsOptions))
 
 app.use(kirjautuminenRouter)
 app.use(accesTokenRouter)
+app.use(removeCookieRouter)
+app.use(viestiRouter)
 
-/* app.get("/", (req, res) => {
-
-    console.log("expressi toimii")
-
-}) */
 
 const uri = process.env.url
 mongoose.connect(uri, {
@@ -50,7 +46,7 @@ app.listen(3001, () => {
 async function bootstrap() {
 
     const schema = await buildSchema({
-        resolvers: [TapahtumaResolver /* , TunnusResolver */]
+        resolvers: [TapahtumaResolver]
     })
 
     const server = new ApolloServer({ schema })
