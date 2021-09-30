@@ -1,7 +1,22 @@
 const Vonage = require('@vonage/server-sdk')
 require('dotenv').config({ path: "./src/.env" })
 
-export function lahetaViesti() {
+export function LuoMsm(tapahtuma, numero) {
+    let viesti = `Tapahtuma ${tapahtuma.otsikko} vastaanottajan numero ${numero} luotu. Osallistujien tunnukset:
+`
+    let msmOsallistujalle = ""
+    tapahtuma.osallistujat.forEach(osallistuja => {
+        msmOsallistujalle += `Tunnus: ${osallistuja.nimi} kirjautuminen: ${process.env.clientUrlTest}/?k=${osallistuja.salasana}&t=${tapahtuma.salasana}
+`
+    });
+    viesti += msmOsallistujalle
+    console.log('VIESTI VIESTI VIESTI VIESTI')
+    console.log(viesti)
+    /* lahetaViesti(viesti, numero) */
+    /* tulevaisuudessa lahetaViesti() niin lähtee tekstiviesti eteenpäin */
+}
+
+export function lahetaViesti(viesti, numero) {
 
     const apiKey = process.env.apiKey
     const apiSecret = process.env.apiSecret
@@ -12,8 +27,8 @@ export function lahetaViesti() {
     })
 
     const from = "Pietsk"
-    const to = "358449718056"
-    const text = 'Haduuken'
+    const to = numero
+    const text = viesti
 
     vonage.message.sendSms(from, to, text, (err, responseData) => {
         if (err) {

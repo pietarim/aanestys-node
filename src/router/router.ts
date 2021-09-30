@@ -4,13 +4,20 @@ import { TunnistautuminenInput } from "../type/tunnus"
 import * as jwt from "jsonwebtoken"
 require('dotenv').config({ path: "./src/.env" })
 import { lahetaViesti } from "../message"
+import { tapahtumaModel, osallistujaModel, ehdotusModel } from "../schema"
+const { check, validationResult } = require('express-validator');
 
 export const kirjautuminenRouter = express.Router()
 export const accesTokenRouter = express.Router()
 export const removeCookieRouter = express.Router()
 export const viestiRouter = express.Router()
 
-kirjautuminenRouter.post("/kirjautuminen", async (req, res) => {
+const kirjautuminenValidation = [
+    check('osallistujaSalasana', "wrong length").isLength({ min: 6, max: 10 }).escape(),
+    check('tapahtumaSalasana', "wrong length").isLength({ min: 6, max: 10 }).escape()
+]
+
+kirjautuminenRouter.post("/kirjautuminen", kirjautuminenValidation, async (req, res) => {
     if (!req.body.osallistujaSalasana || !req.body.tapahtumaSalasana) {
         throw Error("kirjautuminen epännistui")
     }
@@ -50,12 +57,13 @@ accesTokenRouter.get("/accesToken", async (req, res) => {
     res.send(uusiAccesToken)
 })
 
-viestiRouter.get("/viesti", async (req, res) => {
+
+/* viestiRouter.get("/viesti", async (req, res) => {
     const vaste = lahetaViesti()
     console.log(vaste)
     console.log("viesti pitäisi olla matkalla")
     res.send("viesti pitäisi olla lähtenyt")
-})
+}) */
 
 removeCookieRouter.get("/removeCookie", async (req, res) => {
     try {

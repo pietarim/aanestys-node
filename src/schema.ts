@@ -10,6 +10,7 @@ interface Tapahtuma {
     otsikko?: string
     vaiheet?: PopulatedDoc<Ehdotus & Document>
     osallistujat?: PopulatedDoc<Osallistuja & Document>
+    paivays: number
 }
 
 interface Ehdotus {
@@ -58,7 +59,15 @@ const tapahtumaSchema = new Schema<Tapahtuma>({
         type: 'ObjectId',
         ref: 'Osallistuja'
     }],
-    salasana: { type: String }
+    salasana: { type: String },
+    paivays: { type: Number }
+})
+
+tapahtumaSchema.set("toJSON", {
+    transform: (document, returnedObject) => {
+        returnedObject._id = returnedObject._id.toStirng
+        delete returnedObject.__v
+    }
 })
 
 const ehdotusSchema = new Schema<Ehdotus>({
@@ -67,11 +76,25 @@ const ehdotusSchema = new Schema<Ehdotus>({
     ehdottajaId: { type: String }
 })
 
+ehdotusSchema.set("toJSON", {
+    transform: (document, returnedObject) => {
+        returnedObject._id = returnedObject._id.toStirng
+        delete returnedObject.__v
+    }
+})
+
 const osallistujaSchema = new Schema<Osallistuja>({
     nimi: { type: String },
     salasana: { type: String },
     ehdotuksetId: { type: [String] },
     aanet: [{ vaiheId: { type: String }, ehdotusId: { type: String } }]
+})
+
+osallistujaSchema.set("toJSON", {
+    transform: (document, returnedObject) => {
+        returnedObject._id = returnedObject._id.toStirng
+        delete returnedObject.__v
+    }
 })
 
 

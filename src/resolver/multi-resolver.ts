@@ -1,66 +1,9 @@
-import {
-    Resolver,
-    Query,
-    Mutation,
-    Arg,
-} from "type-graphql";
+import { Resolver, Query, Mutation, Arg } from "type-graphql";
 import { tapahtumaModel } from "../schema";
 import service from "../db/serviceV2"
 
-import { PalautettavaTapahtuma, KirjautuminenInput, TapahtumaLuominenInput, Ruokalaji, AaniInput, TapahtumaInput, EhdotusInput, Kirjautuminen } from "../type/tapahtuma";
+import { PalautettavaTapahtuma, KirjautuminenInput, TapahtumaLuominenInput, AaniInput, EhdotusInput, Kirjautuminen } from "../type/tapahtuma";
 /* import { service } from 'db/service' */
-import jwt from "jsonwebtoken"
-
-const henkilo = {
-    nimi: "make",
-    ika: 34
-}
-
-const aaa = {
-    tapahtumaNimi: "Häät",
-    ruokalajit: [
-        {
-            vaihe: "alkuruoka",
-            ehdotukset: [
-                {
-                    nimi: "makkaraperunat",
-                    id: "3243",
-                    aanet: ["fdsa", "adsf"]
-                },
-                {
-                    nimi: "bruchetta",
-                    id: "3244",
-                    aanet: ["fdsa", "adsf"]
-                }
-            ]
-        },
-        {
-            vaihe: "pääruoka",
-            ehdotukset: [
-                {
-                    nimi: "pekoni",
-                    id: "3246",
-                    aanet: ["fdsa", "adsf"]
-                },
-                {
-                    nimi: "tomaattikeitto",
-                    id: "3246",
-                    aanet: ["fdsa", "adsf"]
-                }
-            ]
-        }
-    ],
-    osallistujat: [
-        {
-            nimi: "sami",
-            id: "afasd"
-        },
-        {
-            nimi: "Marke",
-            id: "adfadfs"
-        }
-    ]
-}
 
 @Resolver(of => PalautettavaTapahtuma)
 export class TapahtumaResolver {
@@ -76,9 +19,7 @@ export class TapahtumaResolver {
     async dbKaikkiHaku(
         @Arg("token") token: string
     ) {
-        console.log("dbKaikkiHaku käynnistetty")
-        /* const id = "6126560c78c8a035544c6146" */
-        const data = service.haeKaikki(token)
+        const data = await service.haeKaikki(token)
         return data
     }
 
@@ -97,8 +38,7 @@ export class TapahtumaResolver {
     ): Promise<String> {
         const payload = ehdotus
         const palaute = await service.ehdotusLisays(payload)
-        console.log(palaute)
-        return "hei"
+        return palaute
     }
 
     @Mutation(of => String)

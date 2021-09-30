@@ -9,7 +9,7 @@ export class PalautettavaTapahtuma {
     @Field(type => [Osallistuja])
     osallistujat: Osallistuja[]
     @Field()
-    id: string
+    _id: string
 }
 
 @ObjectType()
@@ -78,6 +78,8 @@ export class TapahtumaInput {
 export class TapahtumaLuominenInput {
     @Field()
     tapahtumaNimi: string
+    @Field()
+    numero: string
     @Field(type => [String])
     vaiheet: [String]
     @Field(type => [String])
@@ -119,8 +121,8 @@ export class AaniInput {
     vaiheId: string
     @Field()
     ehdotusId: string
-    @Field({ nullable: true })
-    edeltavaEhdotusId: string
+    /* @Field({ nullable: true })
+    edeltavaEhdotusId: string */
     @Field()
     tapahtumaId: string
 }
@@ -139,8 +141,8 @@ export class EhdotusInput {
     tapahtumaId: string */
     @Field()
     ehdotus: string
-    /* @Field()
-    ehdottajaId: string */
+    @Field()
+    ehdottajaId: string
     @Field()
     /* määränpää osoite */
     vaiheId: string
