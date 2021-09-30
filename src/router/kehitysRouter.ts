@@ -19,6 +19,5 @@ kaikkiPoisRouter.get("/poies", async (req, res) => {
 
 findOneRouter.get("/etsi", async (req, res) => {
     const tulos = await osallistujaModel.findOne({ salasana: "BbT5b2kv" })
-    console.log(tulos)
     res.send(tulos)
 })

@@ -3,11 +3,6 @@ import * as jwt from "jsonwebtoken"
 require('dotenv').config({ path: "./src/.env" })
 import { LuoMsm } from "../message"
 
-async function Kirjautuminen2(tunnus) {
-    const tapahtuma = await tapahtumaModel.find({ salasana: tunnus.salasana })
-    const osallistuja = await osallistujaModel.findOne({ salasana: tunnus.salasana })
-}
-
 function decodeToken(token) {
     try {
         const decodedToken = jwt.verify(token, process.env.salaisuus)
@@ -40,7 +35,7 @@ async function vanhentuneenPoistaminen() {
     const tapahtuma = await tapahtumaModel.find({})
     if (tapahtuma) {
         tapahtuma.forEach(async n => {
-            const vanhenee = n.paivays/* .getMilliseconds() */ + 6800000 /* kaks min */ /* 604800000 */ /* yksi viikko */
+            const vanhenee = n.paivays + 6800000 /* 604800000 */ /* yksi viikko */
             if (vanhenee < vertausPaiva) {
                 tapahtumanPoistaminen(n._id)
             }
@@ -49,7 +44,6 @@ async function vanhentuneenPoistaminen() {
 }
 
 const luominen = async (payload) => {
-    console.log("LUOMINEN")
     const lahetettava = {
         otsikko: payload.tapahtumaNimi,
     }
@@ -62,10 +56,6 @@ const luominen = async (payload) => {
         }
     })
 
-    console.log("let suodatettuOssArr = []")
-    console.log(suodatettuOssArr)
-
-
     let PromiseArr = suodatettuOssArr.map(n => ihminenLisays(n))
     osallistujaIdArr = await Promise.all(PromiseArr)
 
@@ -77,9 +67,6 @@ const luominen = async (payload) => {
             suodatettuVaiheArr = suodatettuVaiheArr.concat(e)
         }
     })
-
-    console.log("let suodatettuVaiheArr = []")
-    console.log(suodatettuVaiheArr)
 
     for (let i in suodatettuVaiheArr) {
         rukalajiArr = rukalajiArr.concat({
@@ -113,9 +100,6 @@ const kirjautuminen = async (tunnistautuminen) => {
     }
     const kirjautunutOsallistuja = await osallistujaModel.findOne({ salasana: tunnistautuminen.osallistujaSalasana })
     const kirjautunutTapahtuma = await tapahtumaModel.findOne({ salasana: tunnistautuminen.tapahtumaSalasana })
-    /* if (!kirjautunutTapahtuma || !kirjautunutOsallistuja) {
-        throw Error("kirjautuminen epäonnistui")
-    } */
     const token = jwt.sign({ osallistujaId: kirjautunutOsallistuja._id, tapahtumaId: kirjautunutTapahtuma._id }, process.env.salaisuus)
     const lahetettava = { token, nimi: kirjautunutOsallistuja.nimi, _id: kirjautunutOsallistuja._id }
     if (!osallistujaLoytyy || !tapahtumaLoytyy) {
@@ -127,10 +111,9 @@ const kirjautuminen = async (tunnistautuminen) => {
 
 const haeKaikki = async (token) => {
     const tunnus = decodeToken(token)
-    const haettu = await tapahtumaModel.findById(tunnus.tapahtumaId).populate('osallistujat', { nimi: 1, ehdotukset: 1, salasana: 1 })
+    const haettu = await tapahtumaModel.findById(tunnus.tapahtumaId)
+        .populate('osallistujat', { nimi: 1, ehdotukset: 1, salasana: 1 })
         .populate('vaiheet.ehdotukset', { ehdotus: 1, aanet: 1, ehdottajaId: 1 })
-    /* haettu.vaiheet.map(n => console.log(n.ehdotukset)) */
-    /* LuoMsm(haettu) */
     return haettu
 }
 
@@ -228,14 +211,11 @@ const aanestaminen = async (payload) => {
         return "done"
     }
 
-    /* Onko vanha aani samassa vaiheessa jo on poistaminen */
-
+    /* Onko vanha aani samassa vaiheessa jo */
     let ehdotus = await ehdotusModel.findById(payload.ehdotusId)
     ehdotus.aanet = ehdotus.aanet.concat(decodedToken.osallistujaId)
     const paivitettyEhdotus = new ehdotusModel(ehdotus)
     const tallennettu = await ehdotusModel.findByIdAndUpdate(payload.ehdotusId, ehdotus)
-
-
 
     if (edeltavaEhdotusId) {
         let paivitettyEhdotusAanet = []
@@ -273,6 +253,5 @@ const aanestaminen = async (payload) => {
     const tilanne = await osallistujaModel.findById(decodedToken.osallistujaId)
     return 'done'
 }
-
 
 export default { luominen, ehdotusLisays, tapahtumanPoistaminen, haeKaikki, aanestaminen, kirjautuminen, vanhentuneenPoistaminen }

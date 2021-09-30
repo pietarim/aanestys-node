@@ -2,7 +2,7 @@ const Vonage = require('@vonage/server-sdk')
 require('dotenv').config({ path: "./src/.env" })
 
 export function LuoMsm(tapahtuma, numero) {
-    let viesti = `Tapahtuma ${tapahtuma.otsikko} vastaanottajan numero ${numero} luotu. Osallistujien tunnukset:
+    let viesti = `Tapahtuma ${tapahtuma.otsikko} luotu. Osallistujien tunnukset:
 `
     let msmOsallistujalle = ""
     tapahtuma.osallistujat.forEach(osallistuja => {
@@ -10,10 +10,7 @@ export function LuoMsm(tapahtuma, numero) {
 `
     });
     viesti += msmOsallistujalle
-    console.log('VIESTI VIESTI VIESTI VIESTI')
-    console.log(viesti)
-    /* lahetaViesti(viesti, numero) */
-    /* tulevaisuudessa lahetaViesti() niin lähtee tekstiviesti eteenpäin */
+    lahetaViesti(viesti, numero)
 }
 
 export function lahetaViesti(viesti, numero) {
@@ -35,7 +32,7 @@ export function lahetaViesti(viesti, numero) {
             console.log(err);
         } else {
             if (responseData.messages[0]['status'] === "0") {
-                console.log("Message sent successfully.");
+                /* console.log("Message sent successfully."); */
             } else {
                 console.log(`Message failed with error: ${responseData.messages[0]['error-text']}`);
             }

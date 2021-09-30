@@ -1,9 +1,13 @@
 import { Resolver, Query, Mutation, Arg } from "type-graphql";
-import { tapahtumaModel } from "../schema";
 import service from "../db/serviceV2"
-
-import { PalautettavaTapahtuma, KirjautuminenInput, TapahtumaLuominenInput, AaniInput, EhdotusInput, Kirjautuminen } from "../type/tapahtuma";
-/* import { service } from 'db/service' */
+import {
+    PalautettavaTapahtuma,
+    KirjautuminenInput,
+    TapahtumaLuominenInput,
+    AaniInput,
+    EhdotusInput,
+    Kirjautuminen
+} from "../type/tapahtuma";
 
 @Resolver(of => PalautettavaTapahtuma)
 export class TapahtumaResolver {

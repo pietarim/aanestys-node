@@ -1,11 +1,5 @@
 import { Schema, model, Document, PopulatedDoc } from 'mongoose';
 
-/* interface Tapahtuma {
-    otsikko: string
-    osallistujat: string[]
-    ehdotukset: ehdotukset
-} */
-
 interface Tapahtuma {
     otsikko?: string
     vaiheet?: PopulatedDoc<Ehdotus & Document>
@@ -30,21 +24,6 @@ interface aanilista {
     vaiheId: string
     ehdotusId: string
 }
-
-/* interface Aani {
-    aanestajanId: string
-    kohdeEhdotusId: string
-} */
-
-/* interface ehdotukset {
-    otsikko: string,
-    aanet: string[]
-} */
-
-/* const aaniSchema = new Schema<Aani>({
-    aanestajanId: { type: String },
-    kohdeEhdotusId: { type: String }
-}) */
 
 const tapahtumaSchema = new Schema<Tapahtuma>({
     otsikko: { type: String },
@@ -96,18 +75,6 @@ osallistujaSchema.set("toJSON", {
         delete returnedObject.__v
     }
 })
-
-
-
-/* const schema = new Schema<Tapahtuma>({
-    otsikko: { type: String, required: true },
-    osallistujat: { type: [String], required: true },
-    ehdotukset: [{
-        otsikko: { type: String },
-        aanet: { type: [String] }
-    }] */
-/* ehdotukset: { type: ehdotuksetSchema } */
-/* }) */
 
 export const tapahtumaModel = model<Tapahtuma>('Tapahtuma', tapahtumaSchema)
 export const ehdotusModel = model<Ehdotus>('Ehdotus', ehdotusSchema)
