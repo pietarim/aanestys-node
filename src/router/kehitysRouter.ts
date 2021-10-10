@@ -6,18 +6,17 @@ export const kaikkiPoisRouter = express.Router()
 export const findOneRouter = express.Router()
 
 kaikkiPoisRouter.get("/poies", async (req, res) => {
-    try {
-        await ehdotusModel.deleteMany()
-        await osallistujaModel.deleteMany()
-        await tapahtumaModel.deleteMany()
-        console.log("kaikki poistettu")
-        res.send("suoritettu")
-    } catch (e) {
-        res.send("poistaminen epäonnistui")
-    }
+  try {
+    await ehdotusModel.deleteMany()
+    await osallistujaModel.deleteMany()
+    await tapahtumaModel.deleteMany()
+    res.send("suoritettu")
+  } catch (e) {
+    res.send("poistaminen epäonnistui")
+  }
 })
 
 findOneRouter.get("/etsi", async (req, res) => {
-    const tulos = await osallistujaModel.findOne({ salasana: "BbT5b2kv" })
-    res.send(tulos)
+  const tulos = await osallistujaModel.findOne({ salasana: "BbT5b2kv" })
+  res.send(tulos)
 })
