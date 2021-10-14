@@ -2,12 +2,15 @@ const Vonage = require('@vonage/server-sdk')
 require('dotenv').config({ path: "./src/.env" })
 import { VERSIO } from "./config"
 
+const urlViestiin = VERSIO === "kehitys" ? process.env.clientUrlTest : process.env.URL
+
+
 export function LuoMsm(tapahtuma, numero) {
   let viesti = `Tapahtuma ${tapahtuma.otsikko} luotu. Osallistujien tunnukset:
 `
   let msmOsallistujalle = ""
   tapahtuma.osallistujat.forEach(osallistuja => {
-    msmOsallistujalle += `Tunnus: ${osallistuja.nimi} kirjautuminen: ${process.env.clientUrlTest}/?k=${osallistuja.salasana}&t=${tapahtuma.salasana}
+    msmOsallistujalle += `Tunnus: ${osallistuja.nimi} kirjautuminen: ${urlViestiin}/?k=${osallistuja.salasana}&t=${tapahtuma.salasana}
 `
   })
   viesti += msmOsallistujalle

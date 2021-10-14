@@ -2,6 +2,7 @@ require('dotenv').config({ path: "./src/.env" })
 
 export const PORT = process.env.PORT
 export const GQL_PORT = process.env.GQL_PORT
+export const URL = process.env.URL
 
 export const VERSIO = process.env.NODE_ENV === "kehitys"
   ? "kehitys"

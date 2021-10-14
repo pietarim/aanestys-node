@@ -27,11 +27,11 @@ app.use(express.json())
 app.use(cookieParser())
 
 app.use(cors(corsOptions))
-app.use(kirjautuminenRouter)
-app.use(accesTokenRouter)
-app.use(removeCookieRouter)
-app.use(kaikkiPoisRouter)
-app.use(findOneRouter)
+app.use("/api", kirjautuminenRouter)
+app.use("/api", accesTokenRouter)
+app.use("/api", removeCookieRouter)
+app.use("/api", kaikkiPoisRouter)
+app.use("/api", findOneRouter)
 
 
 const uri = process.env.url

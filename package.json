@@ -5,7 +5,8 @@
   "license": "MIT",
   "scripts": {
     "kehitys": "cross-env NODE_ENV=kehitys nodemon --exec ts-node src/index.ts",
-    "start": "cross-env NODE_END=tuotanto nodemon --exec ts-node src/index.ts"
+    "start": "cross-env NODE_END=tuotanto nodemon --exec ts-node src/index.ts",
+    "build": "tsc"
   },
   "dependencies": {
     "@vonage/server-sdk": "^2.10.10",

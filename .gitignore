@@ -3,3 +3,5 @@ node_modules
 tekstiviesti.rest
 accesToken.rest
 hakeminen.rest
+dist
+src/router/kehitysRouter.ts
